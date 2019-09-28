@@ -4,9 +4,17 @@
   height: 100vh;
 }
 
+#newGame{
+  width: 100vw;
+  display: flex;
+  margin: 0px;
+  padding: 0px;
+  
+}
+
 .table{
   height: 45vh;
-  width: 45vw;
+  width: 60vw;
   background: lightgreen;
 }
 
