@@ -8,9 +8,16 @@ let highCards = ["10","J","K","Q"];
 
 const dealerPlay = () => {
   let dScore = document.getElementById("dealerScore");
+  let pScore = document.getElementById("playerScore");
   while (parseInt(dScore.innerHTML)<=15){
     drawCard("dealerTable","dealerScore");
   }
+  if(parseInt(dScore.innerHTML) > parseInt(pScore.innerHTML)){
+    alert("The dealer wins this round!")
+  }else{
+    alert("Congrats, you wins this round!")
+  }
+  clearTable();
 }
 
 const startGame = () => {
@@ -53,6 +60,7 @@ const checkScore = () => {
   let pScore = parseInt(score.innerHTML);
   if(pScore === 21){
     alert("BLACKJACK!!");
+    score.innerHTML = 0;
     clearTable();
   }else if(pScore > 21 ){
     alert("You've Lost!!");
