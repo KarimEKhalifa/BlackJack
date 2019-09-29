@@ -12,6 +12,10 @@
   
 }
 
+#nButton{
+  display: none;
+}
+
 .table{
   height: 45vh;
   width: 60vw;

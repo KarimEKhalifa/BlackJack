@@ -2,34 +2,51 @@ import React from 'react';
 import {Row, Col, Container, Jumbotron, Button, FormControl, ButtonToolbar} from 'react-bootstrap'
 import './App.css';
 
+let cardColor, highCards, dScore, pScore, nButton, dRes, bButton, betArea, avBalance;
+let pTable, dTable;
 
-let cardColor = ["C","D","H","S"];
-let highCards = ["10","J","K","Q"];
+document.addEventListener('DOMContentLoaded', function() {
+  cardColor = ["C","D","H","S"];
+  highCards = ["10","J","K","Q"];
+  dScore = document.getElementById("dealerScore");
+  pScore = document.getElementById("playerScore");
+  nButton = document.getElementById("nButton");
+  dRes = document.getElementById("dispResult");
+  bButton = document.getElementById("bButton");
+  betArea = document.getElementById("betValue");
+  avBalance = document.getElementById("avBalance");
+  pTable = document.getElementById("playerTable");
+  dTable = document.getElementById("dealerTable");
+}, false);
+
+
 
 const dealerPlay = () => {
-  let dScore = document.getElementById("dealerScore");
-  let pScore = document.getElementById("playerScore");
+
   while (parseInt(dScore.innerHTML)<=15){
-    drawCard("dealerTable","dealerScore");
+    drawCard(dTable,dScore);
   }
   if(parseInt(dScore.innerHTML) > parseInt(pScore.innerHTML)){
-    alert("The dealer wins this round!")
+    dRes.innerHTML="The dealer wins this round!"
   }else{
-    alert("Congrats, you wins this round!")
+    dRes.innerHTML="Congrats, you wins this round!"
   }
+  nButton.style.display = "block";
+}
+
+const nextRound = () => {
+  let nButton = document.getElementById("nButton");
   clearTable();
+  nButton.style.display = "none";
 }
 
 const startGame = () => {
-  let bButton = document.getElementById("bButton");
-  let betArea = document.getElementById("betValue");
-  let avBalance = document.getElementById("avBalance");
   let betValue = betArea.value;
   if (betValue <= parseInt(avBalance.innerHTML)){
     betArea.setAttribute("disabled","");
     avBalance.innerHTML = parseInt(avBalance.innerHTML) - parseInt(betValue);
-    dispStartCards("playerTable","playerScore");
-    dispStartCards("dealerTable","dealerScore");
+    dispStartCards(pTable,pScore);
+    dispStartCards(dTable,dScore);
     bButton.style.display = "none";
   }else{
     alert("Cannot bet more than you have! Duh!")
@@ -38,11 +55,6 @@ const startGame = () => {
 }
 
 const clearTable = () => {
-  let pTable = document.getElementById("playerTable");
-  let dTable = document.getElementById("dealerTable");
-  let betArea = document.getElementById("betValue");
-  let bButton = document.getElementById("bButton");
-  let dScore = document.getElementById("dealerScore");
   while (pTable.firstChild) {
     pTable.removeChild(pTable.firstChild);
   }
@@ -53,19 +65,20 @@ const clearTable = () => {
   betArea.value = ""
   bButton.style.display = "block";
   dScore.innerHTML = "0"
+  pScore.innerHTML = "0"
+  dRes.innerHTML = ""
 }
 
 const checkScore = () => {
-  let score = document.getElementById("playerScore");
-  let pScore = parseInt(score.innerHTML);
+  pScore = parseInt(pScore.innerHTML);
   if(pScore === 21){
-    alert("BLACKJACK!!");
-    score.innerHTML = 0;
-    clearTable();
+    dRes.innerHTML = "BLACKJACK!!";
+    nButton.style.display = "block";
+    bButton.style.display = "none";
   }else if(pScore > 21 ){
-    alert("You've Lost!!");
-    score.innerHTML = 0;
-    clearTable();
+    dRes.innerHTML = "You've lost!";
+    nButton.style.display = "block";
+    bButton.style.display = "none";
   }
 }
 
@@ -82,42 +95,36 @@ const checkCard = (value) => {
 }
 
 
-
-async function drawCard(wTable, wScore){
-  let pTable = document.getElementById(wTable);
-  let pScore = document.getElementById(wScore);
-  let nCard = genStart()[0];
-  pScore.innerHTML = parseInt(pScore.innerHTML)+parseInt(nCard);
+const drawCard = (wTable, wScore) => {
+  let nCard = genCard();
+  console.log(wScore)
+  wScore.innerHTML = parseInt(wScore.innerHTML)+parseInt(nCard);
   let aCard = checkCard(nCard);
   let selectedColor = cardColor[Math.floor(Math.random()*4)];
   let cardImages = document.createElement("img");
   cardImages.src=`./cards/${aCard}${selectedColor}.png`;
   console.log(`./cards/${aCard}${selectedColor}.png`)
-  pTable.appendChild(cardImages);
+  wTable.appendChild(cardImages);
   return cardImages;
 }
 
 const dispStartCards = (wTable, wScore) => {
-  let pTable = document.getElementById(wTable);
-  let pScore = document.getElementById(wScore);
-  let cardsValue = genStart();
   let cards = 0;
+  let sum = 0;
   for( let i =0; i< 2; i++){
-    cards = checkCard(cardsValue[i]);
+    cards = genCard();
+    sum+=cards;
+    cards = checkCard(cards);
     let selectedColor = cardColor[Math.floor(Math.random()*4)];
     let cardImages = document.createElement("img");
     cardImages.src=`./cards/${cards}${selectedColor}.png`;
     console.log(`./cards/${cards}${selectedColor}.png`)
-    pTable.appendChild(cardImages);
+    wTable.appendChild(cardImages);
   }
-  let sum = cardsValue.reduce( (sum,c) => sum+=c, 0);
-  pScore.innerHTML = sum;
+  wScore.innerHTML = sum;
 }
-const genStart = () =>{
-  let cards = [];
-  cards[0] = Math.ceil(Math.random()*10)
-  cards[1] = Math.ceil(Math.random()*10)
-  return cards;
+const genCard = () =>{
+  return Math.ceil(Math.random()*10)
 }
 
 function App() {
@@ -143,6 +150,7 @@ function App() {
             </div>
           </Row>
           <Jumbotron>
+          <p id="dispResult"></p>
           <Row>
             <Col>
               <p>Available Balance: <span id="avBalance">1000</span></p>
@@ -153,8 +161,9 @@ function App() {
             <Col>
             <ButtonToolbar>
               <Button id="bButton" onClick={startGame} style={{"marginRight": "10px"}}>Bet</Button>
-              <Button onClick={() => {drawCard("playerTable","playerScore").then(checkScore());}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
-              <Button onClick={ dealerPlay } variant="info">Stand</Button>
+              <Button onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
+              <Button onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
+              <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
             </ButtonToolbar>
             </Col>
           </Row>
