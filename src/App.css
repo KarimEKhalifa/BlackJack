@@ -1,7 +1,7 @@
 
 .App{
   width: 100vw;
-  height: 100vh;
+  height: 90vh;
 }
 
 #newGame{
@@ -17,7 +17,7 @@
 }
 
 .table{
-  height: 45vh;
+  height: 35vh;
   width: 60vw;
   background: lightgreen;
 }
@@ -31,6 +31,6 @@
 }
 
 img{
-  width: 120px;
-  height: 180px;
+  width: 100px;
+  height: 150px;
 }

@@ -1,8 +1,8 @@
-import React from 'react';
+import React , {Component} from 'react';
 import {Row, Col, Container, Jumbotron, Button, FormControl, ButtonToolbar} from 'react-bootstrap'
 import './App.css';
 
-let cardColor, highCards, dScore, pScore, nButton, dRes, bButton, betArea, avBalance;
+let cardColor, highCards, dScore, pScore, nButton, bButton, dRes, betArea, avBalance;
 let pTable, dTable;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -19,23 +19,49 @@ document.addEventListener('DOMContentLoaded', function() {
   dTable = document.getElementById("dealerTable");
 }, false);
 
+const delElem = (elem) => {
+  while (elem.firstChild) {
+    elem.removeChild(elem.firstChild);
+  }
+}
+const appElem = (elem , txt) => {
+  let appendElem = document.createElement("p");
+  appendElem.innerText = txt;
+  elem.appendChild(appendElem);
+}
+const repElem = (elem , txt) => {
+  let newElem = document.createElement("p");
+  newElem.innerText = txt;
+  elem.replaceChild(newElem,elem.firstChild);
+}
 
-
+const updateBalance = (num) => {
+  if (num === 0)
+    avBalance.innerText = parseInt(avBalance.innerText) - parseInt(betArea.innerText);
+  else if( num === 1)
+    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.innerText);
+  else
+    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.innerText)*(2/3);
+}
 const dealerPlay = () => {
 
-  while (parseInt(dScore.innerHTML)<=15){
-    drawCard(dTable,dScore);
-  }
-  if(parseInt(dScore.innerHTML) > parseInt(pScore.innerHTML)){
-    dRes.innerHTML="The dealer wins this round!"
+  let dealer = parseInt(dScore.firstChild.innerText)
+  let player = parseInt(pScore.firstChild.innerText)
+
+  if (dealer < 15){
+     drawCard(dTable,dScore);
+   }
+  if(dealer > player && dealer<=21){
+    appElem(dRes,"The dealer wins this round!");
+    updateBalance(0);
   }else{
-    dRes.innerHTML="Congrats, you wins this round!"
+    appElem(dRes,"Congrats, you win this round!");
+    updateBalance(1);
   }
   nButton.style.display = "block";
 }
 
 const nextRound = () => {
-  let nButton = document.getElementById("nButton");
   clearTable();
   nButton.style.display = "none";
 }
@@ -51,32 +77,29 @@ const startGame = () => {
   }else{
     alert("Cannot bet more than you have! Duh!")
   }
-  
 }
 
 const clearTable = () => {
-  while (pTable.firstChild) {
-    pTable.removeChild(pTable.firstChild);
-  }
-  while (dTable.firstChild) {
-    dTable.removeChild(dTable.firstChild);
-  }
+  delElem(pTable);
+  delElem(dTable);
+  repElem(pScore,"0")
+  repElem(dScore,"0");
+  delElem(dRes);
+  betArea.value="";
   betArea.removeAttribute("disabled");
-  betArea.value = ""
   bButton.style.display = "block";
-  dScore.innerHTML = "0"
-  pScore.innerHTML = "0"
-  dRes.innerHTML = ""
 }
 
 const checkScore = () => {
-  pScore = parseInt(pScore.innerHTML);
-  if(pScore === 21){
-    dRes.innerHTML = "BLACKJACK!!";
+  let score = parseInt(pScore.firstChild.innerText);
+  if(score === 21){
+    updateBalance(2);
+    appElem(dRes,"BLACKJACK!!");
     nButton.style.display = "block";
     bButton.style.display = "none";
-  }else if(pScore > 21 ){
-    dRes.innerHTML = "You've lost!";
+  }else if(score > 21 ){
+    updateBalance(0);
+    appElem(dRes,"You've lost!");
     nButton.style.display = "block";
     bButton.style.display = "none";
   }
@@ -94,18 +117,18 @@ const checkCard = (value) => {
   return cards;
 }
 
-
 const drawCard = (wTable, wScore) => {
   let nCard = genCard();
-  console.log(wScore)
-  wScore.innerHTML = parseInt(wScore.innerHTML)+parseInt(nCard);
+  let newScore = parseInt(wScore.firstChild.innerText)+ parseInt(nCard);
+  console.log(newScore);
+  repElem(wScore,newScore);
   let aCard = checkCard(nCard);
   let selectedColor = cardColor[Math.floor(Math.random()*4)];
+
   let cardImages = document.createElement("img");
   cardImages.src=`./cards/${aCard}${selectedColor}.png`;
-  console.log(`./cards/${aCard}${selectedColor}.png`)
+
   wTable.appendChild(cardImages);
-  return cardImages;
 }
 
 const dispStartCards = (wTable, wScore) => {
@@ -121,56 +144,66 @@ const dispStartCards = (wTable, wScore) => {
     console.log(`./cards/${cards}${selectedColor}.png`)
     wTable.appendChild(cardImages);
   }
-  wScore.innerHTML = sum;
+  repElem(wScore,sum);
 }
 const genCard = () =>{
   return Math.ceil(Math.random()*10)
 }
 
-function App() {
-  return (
-    <div className="App">
-      <Container id="Container">
-          <Row>
-            <div id="newGame">
+class App extends Component {
+
+  shouldComponentUpdate() {
+    return false;
+  }
+  
+  render(){
+
+    return (
+      <div className="App">
+        <Container id="Container">
+            <Row>
+              <div id="newGame">
+                <Col>
+                  <Jumbotron className="bjTable">
+                    <h2>Player</h2>
+                    <div className="table" id="playerTable"></div>
+                    <p>Score: <span id="playerScore">0</span></p>
+                  </Jumbotron>
+                </Col>
+                <Col>
+                  <Jumbotron className="bjTable">
+                    <h2>Dealer</h2>
+                    <div className="table" id="dealerTable"></div>
+                    <p>Score: <span id="dealerScore">0</span></p>
+                  </Jumbotron>
+                </Col>
+              </div>
+            </Row>
+            <Jumbotron>
+            <p id="dispResult"></p>
+            <Row>
               <Col>
-                <Jumbotron className="bjTable">
-                  <h2>Player</h2>
-                  <div className="table" id="playerTable"></div>
-                  <p>Score: <span id="playerScore">0</span></p>
-                </Jumbotron>
+                <p>Available Balance: <span id="avBalance">1000</span></p>
               </Col>
               <Col>
-                <Jumbotron className="bjTable">
-                  <h2>Dealer</h2>
-                  <div className="table" id="dealerTable"></div>
-                  <p>Score: <span id="dealerScore">0</span></p>
-                </Jumbotron>
+                <FormControl id="betValue" placeholder="Enter the amount you're willing to bet!"></FormControl>
               </Col>
-            </div>
-          </Row>
-          <Jumbotron>
-          <p id="dispResult"></p>
-          <Row>
-            <Col>
-              <p>Available Balance: <span id="avBalance">1000</span></p>
-            </Col>
-            <Col>
-              <FormControl id="betValue" placeholder="Enter the amount you're willing to bet!"></FormControl>
-            </Col>
-            <Col>
-            <ButtonToolbar>
-              <Button id="bButton" onClick={startGame} style={{"marginRight": "10px"}}>Bet</Button>
-              <Button onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
-              <Button onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
-              <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
-            </ButtonToolbar>
-            </Col>
-          </Row>
-          </Jumbotron>
-      </Container>
-    </div>
-  );
+              <Col>
+              <ButtonToolbar>
+                <Button id="bButton" onClick={startGame} style={{"marginRight": "10px"}}>Bet</Button>
+                <Button onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
+                <Button onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
+                <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
+              </ButtonToolbar>
+              </Col>
+            </Row>
+            </Jumbotron>
+        </Container>
+      </div>
+    );
+
+  }
+
 }
 
 export default App;
