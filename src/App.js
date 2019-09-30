@@ -3,7 +3,7 @@ import {Row, Col, Container, Jumbotron, Button, FormControl, ButtonToolbar} from
 import './App.css';
 
 let cardColor, highCards, dScore, pScore, nButton, bButton, dRes, betArea, avBalance;
-let pTable, dTable;
+let pTable, dTable, hButton, sButton;
 
 document.addEventListener('DOMContentLoaded', function() {
   cardColor = ["C","D","H","S"];
@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
   nButton = document.getElementById("nButton");
   dRes = document.getElementById("dispResult");
   bButton = document.getElementById("bButton");
+  hButton = document.getElementById("hButton");
+  sButton = document.getElementById("sButton");
   betArea = document.getElementById("betValue");
   avBalance = document.getElementById("avBalance");
   pTable = document.getElementById("playerTable");
@@ -36,24 +38,25 @@ const repElem = (elem , txt) => {
 }
 
 const updateBalance = (num) => {
+  console.log(avBalance.innerHTML)
   if (num === 0)
-    avBalance.innerText = parseInt(avBalance.innerText) - parseInt(betArea.innerText);
+    avBalance.innerText = parseInt(avBalance.innerText) - parseInt(betArea.value);
   else if( num === 1)
-    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.innerText);
+    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*2;
   else
-    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.innerText)*(2/3);
+    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*(3/2);
 }
 const dealerPlay = () => {
-
-  let dealer = parseInt(dScore.firstChild.innerText)
   let player = parseInt(pScore.firstChild.innerText)
-
-  if (dealer < 15){
+  hButton.style.display = "none";
+  sButton.style.display = "none";
+  while (parseInt(dScore.firstChild.innerText) < 15)
      drawCard(dTable,dScore);
-   }
-  if(dealer > player && dealer<=21){
+  if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
     appElem(dRes,"The dealer wins this round!");
     updateBalance(0);
+  }else if (parseInt(dScore.firstChild.innerText)=== player){
+    appElem(dRes,"Draw!")
   }else{
     appElem(dRes,"Congrats, you win this round!");
     updateBalance(1);
@@ -74,6 +77,8 @@ const startGame = () => {
     dispStartCards(pTable,pScore);
     dispStartCards(dTable,dScore);
     bButton.style.display = "none";
+    hButton.style.display = "block";
+    sButton.style.display = "block";
   }else{
     alert("Cannot bet more than you have! Duh!")
   }
@@ -88,6 +93,8 @@ const clearTable = () => {
   betArea.value="";
   betArea.removeAttribute("disabled");
   bButton.style.display = "block";
+  hButton.style.display = "none";
+  sButton.style.display = "none";
 }
 
 const checkScore = () => {
@@ -97,11 +104,15 @@ const checkScore = () => {
     appElem(dRes,"BLACKJACK!!");
     nButton.style.display = "block";
     bButton.style.display = "none";
+    hButton.style.display = "none";
+    sButton.style.display = "none";
   }else if(score > 21 ){
     updateBalance(0);
     appElem(dRes,"You've lost!");
     nButton.style.display = "block";
     bButton.style.display = "none";
+    hButton.style.display = "none";
+    sButton.style.display = "none";
   }
 }
 
@@ -191,8 +202,8 @@ class App extends Component {
               <Col>
               <ButtonToolbar>
                 <Button id="bButton" onClick={startGame} style={{"marginRight": "10px"}}>Bet</Button>
-                <Button onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
-                <Button onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
+                <Button id="hButton" onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
+                <Button id="sButton" onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
                 <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
               </ButtonToolbar>
               </Col>

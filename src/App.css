@@ -12,7 +12,7 @@
   
 }
 
-#nButton{
+#nButton,#sButton,#hButton{
   display: none;
 }
 
