@@ -50,6 +50,7 @@ const dealerPlay = () => {
   let player = parseInt(pScore.firstChild.innerText)
   hButton.style.display = "none";
   sButton.style.display = "none";
+  dTable.removeChild(dTable.firstChild);
   while (parseInt(dScore.firstChild.innerText) < 15)
      drawCard(dTable,dScore);
   if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
@@ -146,13 +147,16 @@ const dispStartCards = (wTable, wScore) => {
   let cards = 0;
   let sum = 0;
   for( let i =0; i< 2; i++){
-    cards = genCard();
-    sum+=cards;
-    cards = checkCard(cards);
-    let selectedColor = cardColor[Math.floor(Math.random()*4)];
     let cardImages = document.createElement("img");
-    cardImages.src=`./cards/${cards}${selectedColor}.png`;
-    console.log(`./cards/${cards}${selectedColor}.png`)
+    if(wTable !== dTable || i===1){
+      cards = genCard();
+      sum+=cards;
+      cards = checkCard(cards);
+      let selectedColor = cardColor[Math.floor(Math.random()*4)];
+      cardImages.src=`./cards/${cards}${selectedColor}.png`;
+    }else{
+      cardImages.src=`./cards/blue_back.png`
+    }
     wTable.appendChild(cardImages);
   }
   repElem(wScore,sum);
