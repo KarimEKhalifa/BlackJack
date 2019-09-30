@@ -44,7 +44,7 @@ const updateBalance = (num) => {
   else if( num === 1)
     avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*2;
   else
-    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*(3/2);
+    avBalance.innerText = parseInt(avBalance.innerText) + Math.ceil(parseInt(betArea.value)*(3/2));
 }
 const dealerPlay = () => {
   let player = parseInt(pScore.firstChild.innerText)
@@ -55,11 +55,14 @@ const dealerPlay = () => {
      drawCard(dTable,dScore);
   if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
     appElem(dRes,"The dealer wins this round!");
+    dRes.style.color = "red";
     updateBalance(0);
   }else if (parseInt(dScore.firstChild.innerText)=== player){
     appElem(dRes,"Draw!")
+    dRes.style.color = "blue";
   }else{
     appElem(dRes,"Congrats, you win this round!");
+    dRes.style.color = "green";
     updateBalance(1);
   }
   nButton.style.display = "block";
@@ -103,6 +106,7 @@ const checkScore = () => {
   if(score === 21){
     updateBalance(2);
     appElem(dRes,"BLACKJACK!!");
+    dRes.style.color = "dark green";
     nButton.style.display = "block";
     bButton.style.display = "none";
     hButton.style.display = "none";
@@ -110,6 +114,7 @@ const checkScore = () => {
   }else if(score > 21 ){
     updateBalance(0);
     appElem(dRes,"You've lost!");
+    dRes.style.color = "red";
     nButton.style.display = "block";
     bButton.style.display = "none";
     hButton.style.display = "none";
