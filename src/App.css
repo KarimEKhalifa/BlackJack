@@ -12,12 +12,17 @@
   
 }
 
+.bjTable{
+  margin-top: -20px;
+}
+
 #nButton,#sButton,#hButton{
   display: none;
 }
 
 .table{
-  height: 35vh;
+  margin-top: 5%;
+  height: 40vh;
   width: 60vw;
   background: lightgreen;
 }

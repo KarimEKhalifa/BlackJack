@@ -39,12 +39,12 @@ const repElem = (elem , txt) => {
 
 const updateBalance = (num) => {
   console.log(avBalance.innerHTML)
-  if (num === 0)
-    avBalance.innerText = parseInt(avBalance.innerText) - parseInt(betArea.value);
-  else if( num === 1)
+  if( num === 1)
     avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*2;
-  else
-    avBalance.innerText = parseInt(avBalance.innerText) + Math.ceil(parseInt(betArea.value)*(3/2));
+  else if ( num === 2)
+    avBalance.innerText = parseInt(avBalance.innerText) + Math.ceil(parseInt(betArea.value)*(5/2));
+  else if ( num === 3)
+    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value);
 }
 const dealerPlay = () => {
   let player = parseInt(pScore.firstChild.innerText)
@@ -56,10 +56,10 @@ const dealerPlay = () => {
   if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
     appElem(dRes,"The dealer wins this round!");
     dRes.style.color = "red";
-    updateBalance(0);
   }else if (parseInt(dScore.firstChild.innerText)=== player){
     appElem(dRes,"Draw!")
     dRes.style.color = "blue";
+    updateBalance(3);
   }else{
     appElem(dRes,"Congrats, you win this round!");
     dRes.style.color = "green";
@@ -75,7 +75,11 @@ const nextRound = () => {
 
 const startGame = () => {
   let betValue = betArea.value;
-  if (betValue <= parseInt(avBalance.innerHTML)){
+  console.log(betValue.length)
+
+  if( !betValue.length ){
+    alert("Don't forget to enter a bet!")
+  }else if (betValue <= parseInt(avBalance.innerHTML)){
     betArea.setAttribute("disabled","");
     avBalance.innerHTML = parseInt(avBalance.innerHTML) - parseInt(betValue);
     dispStartCards(pTable,pScore);
@@ -84,7 +88,7 @@ const startGame = () => {
     hButton.style.display = "block";
     sButton.style.display = "block";
   }else{
-    alert("Cannot bet more than you have! Duh!")
+    alert("Cannot bet more than you have!")
   }
 }
 
@@ -106,7 +110,7 @@ const checkScore = () => {
   if(score === 21){
     updateBalance(2);
     appElem(dRes,"BLACKJACK!!");
-    dRes.style.color = "dark green";
+    dRes.style.color = "green";
     nButton.style.display = "block";
     bButton.style.display = "none";
     hButton.style.display = "none";
@@ -119,6 +123,15 @@ const checkScore = () => {
     bButton.style.display = "none";
     hButton.style.display = "none";
     sButton.style.display = "none";
+  }
+}
+
+function checkInt(event){
+  let value = parseInt(event.target.value)
+  console.log(value)
+  if( isNaN(value)){
+    alert("Please enter a valid NUMBER!");
+    betArea.value = ""
   }
 }
 
@@ -206,7 +219,7 @@ class App extends Component {
                 <p>Available Balance: <span id="avBalance">1000</span></p>
               </Col>
               <Col>
-                <FormControl id="betValue" placeholder="Enter the amount you're willing to bet!"></FormControl>
+                <FormControl onChange={checkInt.bind(this)} id="betValue" placeholder="Enter the amount you're willing to bet!"></FormControl>
               </Col>
               <Col>
               <ButtonToolbar>
