@@ -28,12 +28,129 @@ class ElementManipulation{
   }
 }
 
+class Game{
+
+  updateBalance = (num) => {
+    console.log(avBalance.innerHTML)
+    if( num === 1)
+      avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*2;
+    else if ( num === 2)
+      avBalance.innerText = parseInt(avBalance.innerText) + Math.ceil(parseInt(betArea.value)*(5/2));
+    else if ( num === 3)
+      avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value);
+  }
+  
+  checkInt(event){
+    let value = parseInt(event.target.value)
+    console.log(value)
+    if( isNaN(value)){
+      alert("Please enter a valid NUMBER!");
+      betArea.value = ""
+    }
+  }
+
+  dealerPlay = () => {
+    let player = parseInt(pScore.firstChild.innerText)
+    hButton.style.display = "none";
+    sButton.style.display = "none";
+    dTable.removeChild(dTable.firstChild);
+    while (parseInt(dScore.firstChild.innerText) < 15)
+       dCards.drawCard();
+    if(avBalance.innerHTML == 0 && (parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player)){
+      dResManip.appElem("The House Wins! Play Again?");
+      dRes.style.color = "red";
+      stButton.style.display = "block";
+      nButton.style.display = "none";
+    }else if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
+      dResManip.appElem("The dealer wins this round!");
+      dRes.style.color = "red";
+      nButton.style.display = "block";
+    }else if (parseInt(dScore.firstChild.innerText)=== player){
+      dResManip.appElem("Draw!")
+      dRes.style.color = "blue";
+      this.updateBalance(3);
+      nButton.style.display = "block";
+    }else{
+      dResManip.appElem("Congrats, you win this round!");
+      dRes.style.color = "green";
+      this.updateBalance(1);
+      nButton.style.display = "block";
+    }
+  }
+  
+  nextRound = () => {
+    pCards.clearCardsTable();
+    dCards.clearCardsTable();
+    nButton.style.display = "none";
+  }
+  
+  newGame = () => {
+    this.nextRound();
+    avBalance.innerHTML = 1000;
+    stButton.style.display = "none";
+  }
+  
+  startGame = () => {
+    let betValue = betArea.value;
+    console.log(betValue.length)
+  
+    if( !betValue.length ){
+      alert("Don't forget to enter a bet!")
+    }else if (betValue <= parseInt(avBalance.innerHTML)){
+      betArea.setAttribute("disabled","");
+      avBalance.innerHTML = parseInt(avBalance.innerHTML) - parseInt(betValue);
+      pCards.dispStartCards();
+      dCards.dispStartCards();
+      bButton.style.display = "none";
+      hButton.style.display = "block";
+      sButton.style.display = "block";
+    }else if(avBalance.innerHTML === 0){
+      stButton.style.display = "block";
+    }else{
+      alert("Cannot bet more than you have!")
+    }
+  }
+  
+  
+  checkScore = () => {
+    let score = parseInt(pScore.firstChild.innerText);
+    if(score === 21){
+      this.pdateBalance(2);
+      dResManip.appElem("BLACKJACK!!");
+      dRes.style.color = "green";
+      nButton.style.display = "block";
+      bButton.style.display = "none";
+      hButton.style.display = "none";
+      sButton.style.display = "none";
+    }else if(avBalance.innerHTML == 0 && score > 21){
+      dResManip.appElem("The House Wins! Play Again?");
+      dRes.style.color = "red";
+      nButton.style.display = "none";
+      bButton.style.display = "none";
+      hButton.style.display = "none";
+      sButton.style.display = "none";
+      stButton.style.display = "block";
+    }else if(score > 21 ){
+      this.updateBalance(0);
+      dResManip.appElem("You've lost!");
+      dRes.style.color = "red";
+      nButton.style.display = "block";
+      bButton.style.display = "none";
+      hButton.style.display = "none";
+      sButton.style.display = "none";
+    }
+  }
+    
+}
+
 class Cards{
 
   constructor(table,score){
     this.value = 0;
     this.wTable = table;
     this.wScore = score;
+    this.wScoreManip = new ElementManipulation(this.wScore);
+    this.wTableManip = new ElementManipulation(this.wTable);
   }
 
   checkCard = () => {
@@ -49,11 +166,10 @@ class Cards{
   }
 
   drawCard = () => {
-    let wScoreManip = new ElementManipulation(this.wScore);
     this.genCard();
     let newScore = parseInt(this.wScore.firstChild.innerText)+ parseInt(this.value);
     console.log(newScore);
-    wScoreManip.repElem(newScore);
+    this.wScoreManip.repElem(newScore);
     let aCard = this.checkCard();
     let selectedColor = cardColor[Math.floor(Math.random()*4)];
   
@@ -66,7 +182,6 @@ class Cards{
   dispStartCards = () => {
     let cards = 0;
     let sum = 0;
-    let wScoreManip = new ElementManipulation(this.wScore);
     for( let i =0; i< 2; i++){
       let cardImages = document.createElement("img");
       if(this.wTable !== dTable || i===1){
@@ -81,7 +196,7 @@ class Cards{
       this.wTable.appendChild(cardImages);
     }
     
-    wScoreManip.repElem(sum);
+    this.wScoreManip.repElem(sum);
   }
 
   genCard = () =>{
@@ -89,10 +204,8 @@ class Cards{
   }
 
   clearCardsTable = () => {
-    let wScoreManip = new ElementManipulation(this.wScore);
-    let wTableManip = new ElementManipulation(this.wTable);
-    wTableManip.delElem();
-    wScoreManip.repElem("0")
+    this.wTableManip.delElem();
+    this.wScoreManip.repElem("0")
     dResManip.delElem();
     betArea.value="";
     betArea.removeAttribute("disabled");
@@ -126,118 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-const updateBalance = (num) => {
-  console.log(avBalance.innerHTML)
-  if( num === 1)
-    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value)*2;
-  else if ( num === 2)
-    avBalance.innerText = parseInt(avBalance.innerText) + Math.ceil(parseInt(betArea.value)*(5/2));
-  else if ( num === 3)
-    avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value);
-}
 
-const dealerPlay = () => {
-  let player = parseInt(pScore.firstChild.innerText)
-  hButton.style.display = "none";
-  sButton.style.display = "none";
-  dTable.removeChild(dTable.firstChild);
-  while (parseInt(dScore.firstChild.innerText) < 15)
-     dCards.drawCard();
-  if(avBalance.innerHTML == 0 && (parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player)){
-    dResManip.appElem("The House Wins! Play Again?");
-    dRes.style.color = "red";
-    stButton.style.display = "block";
-    nButton.style.display = "none";
-  }else if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
-    dResManip.appElem("The dealer wins this round!");
-    dRes.style.color = "red";
-    nButton.style.display = "block";
-  }else if (parseInt(dScore.firstChild.innerText)=== player){
-    dResManip.appElem("Draw!")
-    dRes.style.color = "blue";
-    updateBalance(3);
-    nButton.style.display = "block";
-  }else{
-    dResManip.appElem("Congrats, you win this round!");
-    dRes.style.color = "green";
-    updateBalance(1);
-    nButton.style.display = "block";
-  }
-}
-
-const nextRound = () => {
-  pCards.clearCardsTable();
-  dCards.clearCardsTable();
-  nButton.style.display = "none";
-}
-
-const newGame = () => {
-  nextRound();
-  avBalance.innerHTML = 1000;
-  stButton.style.display = "none";
-}
-
-const startGame = () => {
-  let betValue = betArea.value;
-  console.log(betValue.length)
-
-  if( !betValue.length ){
-    alert("Don't forget to enter a bet!")
-  }else if (betValue <= parseInt(avBalance.innerHTML)){
-    betArea.setAttribute("disabled","");
-    avBalance.innerHTML = parseInt(avBalance.innerHTML) - parseInt(betValue);
-    pCards.dispStartCards();
-    dCards.dispStartCards();
-    bButton.style.display = "none";
-    hButton.style.display = "block";
-    sButton.style.display = "block";
-  }else if(avBalance.innerHTML === 0){
-    stButton.style.display = "block";
-  }else{
-    alert("Cannot bet more than you have!")
-  }
-}
-
-
-const checkScore = () => {
-  let score = parseInt(pScore.firstChild.innerText);
-  if(score === 21){
-    updateBalance(2);
-    dResManip.appElem("BLACKJACK!!");
-    dRes.style.color = "green";
-    nButton.style.display = "block";
-    bButton.style.display = "none";
-    hButton.style.display = "none";
-    sButton.style.display = "none";
-  }else if(avBalance.innerHTML == 0 && score > 21){
-    dResManip.appElem("The House Wins! Play Again?");
-    dRes.style.color = "red";
-    nButton.style.display = "none";
-    bButton.style.display = "none";
-    hButton.style.display = "none";
-    sButton.style.display = "none";
-    stButton.style.display = "block";
-  }else if(score > 21 ){
-    updateBalance(0);
-    dResManip.appElem("You've lost!");
-    dRes.style.color = "red";
-    nButton.style.display = "block";
-    bButton.style.display = "none";
-    hButton.style.display = "none";
-    sButton.style.display = "none";
-  }
-}
-
-function checkInt(event){
-  let value = parseInt(event.target.value)
-  console.log(value)
-  if( isNaN(value)){
-    alert("Please enter a valid NUMBER!");
-    betArea.value = ""
-  }
-}
-
-
+let blackJack = new Game();
 
 class App extends Component {
 
@@ -275,15 +278,15 @@ class App extends Component {
                 <p>Available Balance: <span id="avBalance">1000</span></p>
               </Col>
               <Col>
-                <FormControl onChange={checkInt.bind(this)} id="betValue" placeholder="Enter the amount you're willing to bet!"></FormControl>
+                <FormControl onChange={blackJack.checkInt.bind(this)} id="betValue" placeholder="Enter the amount you're willing to bet!"></FormControl>
               </Col>
               <Col>
               <ButtonToolbar>
-                <Button id="bButton" onClick={startGame} style={{"marginRight": "10px"}}>Bet</Button>
-                <Button id="hButton" onClick={() => {pCards.drawCard(); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
-                <Button id="sButton" onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
-                <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
-                <Button id="stButton" onClick = { newGame } variant="warning">Start New Game!</Button>
+                <Button id="bButton" onClick={blackJack.startGame} style={{"marginRight": "10px"}}>Bet</Button>
+                <Button id="hButton" onClick={() => {pCards.drawCard(); blackJack.checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
+                <Button id="sButton" onClick={ blackJack.dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
+                <Button id="nButton" onClick = { blackJack.nextRound } variant="warning">Next Round!</Button>
+                <Button id="stButton" onClick = { blackJack.newGame } variant="warning">Start New Game!</Button>
               </ButtonToolbar>
               </Col>
             </Row>
