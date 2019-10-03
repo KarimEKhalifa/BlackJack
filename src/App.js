@@ -2,8 +2,106 @@ import React , {Component} from 'react';
 import {Row, Col, Container, Jumbotron, Button, FormControl, ButtonToolbar} from 'react-bootstrap'
 import './App.css';
 
-let cardColor, highCards, dScore, pScore, nButton, bButton, stButton, dRes, betArea, avBalance;
-let pTable, dTable, hButton, sButton;
+let cardColor, highCards, dScore, pScore, dRes, betArea, avBalance;
+let pTable, dTable, hButton, sButton, nButton, bButton, stButton;
+let dResManip, pCards, dCards;
+
+class ElementManipulation{
+
+  constructor(el){
+    this.elem = el;
+  }
+    delElem = () => {
+    while (this.elem.firstChild) {
+      this.elem.removeChild(this.elem.firstChild);
+    }
+  }
+  appElem = (txt) => {
+    let appendElem = document.createElement("p");
+    appendElem.innerText = txt;
+    this.elem.appendChild(appendElem);
+  }
+  repElem = (txt) => {
+    let newElem = document.createElement("p");
+    newElem.innerText = txt;
+    this.elem.replaceChild(newElem,this.elem.firstChild);
+  }
+}
+
+class Cards{
+
+  constructor(table,score){
+    this.value = 0;
+    this.wTable = table;
+    this.wScore = score;
+  }
+
+  checkCard = () => {
+    let cards = 0;
+    if (this.value === 10){
+      cards = highCards[Math.floor(Math.random()*4)];
+    }else if(this.value === 1){
+      cards = "A";
+    }else{
+    cards = this.value
+    }
+    return cards;
+  }
+
+  drawCard = () => {
+    let wScoreManip = new ElementManipulation(this.wScore);
+    this.genCard();
+    let newScore = parseInt(this.wScore.firstChild.innerText)+ parseInt(this.value);
+    console.log(newScore);
+    wScoreManip.repElem(newScore);
+    let aCard = this.checkCard();
+    let selectedColor = cardColor[Math.floor(Math.random()*4)];
+  
+    let cardImages = document.createElement("img");
+    cardImages.src=`./cards/${aCard}${selectedColor}.png`;
+  
+    this.wTable.appendChild(cardImages);
+  }
+
+  dispStartCards = () => {
+    let cards = 0;
+    let sum = 0;
+    let wScoreManip = new ElementManipulation(this.wScore);
+    for( let i =0; i< 2; i++){
+      let cardImages = document.createElement("img");
+      if(this.wTable !== dTable || i===1){
+        this.genCard();
+        sum+=this.value;
+        cards = this.checkCard();
+        let selectedColor = cardColor[Math.floor(Math.random()*4)];
+        cardImages.src=`./cards/${cards}${selectedColor}.png`;
+      }else{
+        cardImages.src=`./cards/blue_back.png`
+      }
+      this.wTable.appendChild(cardImages);
+    }
+    
+    wScoreManip.repElem(sum);
+  }
+
+  genCard = () =>{
+    this.value = Math.ceil(Math.random()*10);
+  }
+
+  clearCardsTable = () => {
+    let wScoreManip = new ElementManipulation(this.wScore);
+    let wTableManip = new ElementManipulation(this.wTable);
+    wTableManip.delElem();
+    wScoreManip.repElem("0")
+    dResManip.delElem();
+    betArea.value="";
+    betArea.removeAttribute("disabled");
+    bButton.style.display = "block";
+    hButton.style.display = "none";
+    sButton.style.display = "none";
+  }
+
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   cardColor = ["C","D","H","S"];
@@ -20,23 +118,13 @@ document.addEventListener('DOMContentLoaded', function() {
   avBalance = document.getElementById("avBalance");
   pTable = document.getElementById("playerTable");
   dTable = document.getElementById("dealerTable");
+
+  dResManip = new ElementManipulation(dRes);
+  pCards = new Cards(pTable,pScore);
+  dCards = new Cards(dTable,dScore);
 }, false);
 
-const delElem = (elem) => {
-  while (elem.firstChild) {
-    elem.removeChild(elem.firstChild);
-  }
-}
-const appElem = (elem , txt) => {
-  let appendElem = document.createElement("p");
-  appendElem.innerText = txt;
-  elem.appendChild(appendElem);
-}
-const repElem = (elem , txt) => {
-  let newElem = document.createElement("p");
-  newElem.innerText = txt;
-  elem.replaceChild(newElem,elem.firstChild);
-}
+
 
 const updateBalance = (num) => {
   console.log(avBalance.innerHTML)
@@ -47,29 +135,30 @@ const updateBalance = (num) => {
   else if ( num === 3)
     avBalance.innerText = parseInt(avBalance.innerText) + parseInt(betArea.value);
 }
+
 const dealerPlay = () => {
   let player = parseInt(pScore.firstChild.innerText)
   hButton.style.display = "none";
   sButton.style.display = "none";
   dTable.removeChild(dTable.firstChild);
   while (parseInt(dScore.firstChild.innerText) < 15)
-     drawCard(dTable,dScore);
+     dCards.drawCard();
   if(avBalance.innerHTML == 0 && (parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player)){
-    appElem(dRes,"The House Wins! Play Again?");
+    dResManip.appElem("The House Wins! Play Again?");
     dRes.style.color = "red";
     stButton.style.display = "block";
     nButton.style.display = "none";
   }else if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
-    appElem(dRes,"The dealer wins this round!");
+    dResManip.appElem("The dealer wins this round!");
     dRes.style.color = "red";
     nButton.style.display = "block";
   }else if (parseInt(dScore.firstChild.innerText)=== player){
-    appElem(dRes,"Draw!")
+    dResManip.appElem("Draw!")
     dRes.style.color = "blue";
     updateBalance(3);
     nButton.style.display = "block";
   }else{
-    appElem(dRes,"Congrats, you win this round!");
+    dResManip.appElem("Congrats, you win this round!");
     dRes.style.color = "green";
     updateBalance(1);
     nButton.style.display = "block";
@@ -77,7 +166,8 @@ const dealerPlay = () => {
 }
 
 const nextRound = () => {
-  clearTable();
+  pCards.clearCardsTable();
+  dCards.clearCardsTable();
   nButton.style.display = "none";
 }
 
@@ -96,8 +186,8 @@ const startGame = () => {
   }else if (betValue <= parseInt(avBalance.innerHTML)){
     betArea.setAttribute("disabled","");
     avBalance.innerHTML = parseInt(avBalance.innerHTML) - parseInt(betValue);
-    dispStartCards(pTable,pScore);
-    dispStartCards(dTable,dScore);
+    pCards.dispStartCards();
+    dCards.dispStartCards();
     bButton.style.display = "none";
     hButton.style.display = "block";
     sButton.style.display = "block";
@@ -108,31 +198,19 @@ const startGame = () => {
   }
 }
 
-const clearTable = () => {
-  delElem(pTable);
-  delElem(dTable);
-  repElem(pScore,"0")
-  repElem(dScore,"0");
-  delElem(dRes);
-  betArea.value="";
-  betArea.removeAttribute("disabled");
-  bButton.style.display = "block";
-  hButton.style.display = "none";
-  sButton.style.display = "none";
-}
 
 const checkScore = () => {
   let score = parseInt(pScore.firstChild.innerText);
   if(score === 21){
     updateBalance(2);
-    appElem(dRes,"BLACKJACK!!");
+    dResManip.appElem("BLACKJACK!!");
     dRes.style.color = "green";
     nButton.style.display = "block";
     bButton.style.display = "none";
     hButton.style.display = "none";
     sButton.style.display = "none";
   }else if(avBalance.innerHTML == 0 && score > 21){
-    appElem(dRes,"The House Wins! Play Again?");
+    dResManip.appElem("The House Wins! Play Again?");
     dRes.style.color = "red";
     nButton.style.display = "none";
     bButton.style.display = "none";
@@ -141,7 +219,7 @@ const checkScore = () => {
     stButton.style.display = "block";
   }else if(score > 21 ){
     updateBalance(0);
-    appElem(dRes,"You've lost!");
+    dResManip.appElem("You've lost!");
     dRes.style.color = "red";
     nButton.style.display = "block";
     bButton.style.display = "none";
@@ -159,53 +237,7 @@ function checkInt(event){
   }
 }
 
-const checkCard = (value) => {
-  let cards = 0;
-  if (value === 10){
-    cards = highCards[Math.floor(Math.random()*4)];
-  }else if(value === 1){
-    cards = "A";
-  }else{
-  cards = value
-  }
-  return cards;
-}
 
-const drawCard = (wTable, wScore) => {
-  let nCard = genCard();
-  let newScore = parseInt(wScore.firstChild.innerText)+ parseInt(nCard);
-  console.log(newScore);
-  repElem(wScore,newScore);
-  let aCard = checkCard(nCard);
-  let selectedColor = cardColor[Math.floor(Math.random()*4)];
-
-  let cardImages = document.createElement("img");
-  cardImages.src=`./cards/${aCard}${selectedColor}.png`;
-
-  wTable.appendChild(cardImages);
-}
-
-const dispStartCards = (wTable, wScore) => {
-  let cards = 0;
-  let sum = 0;
-  for( let i =0; i< 2; i++){
-    let cardImages = document.createElement("img");
-    if(wTable !== dTable || i===1){
-      cards = genCard();
-      sum+=cards;
-      cards = checkCard(cards);
-      let selectedColor = cardColor[Math.floor(Math.random()*4)];
-      cardImages.src=`./cards/${cards}${selectedColor}.png`;
-    }else{
-      cardImages.src=`./cards/blue_back.png`
-    }
-    wTable.appendChild(cardImages);
-  }
-  repElem(wScore,sum);
-}
-const genCard = () =>{
-  return Math.ceil(Math.random()*10)
-}
 
 class App extends Component {
 
@@ -248,7 +280,7 @@ class App extends Component {
               <Col>
               <ButtonToolbar>
                 <Button id="bButton" onClick={startGame} style={{"marginRight": "10px"}}>Bet</Button>
-                <Button id="hButton" onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
+                <Button id="hButton" onClick={() => {pCards.drawCard(); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
                 <Button id="sButton" onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
                 <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
                 <Button id="stButton" onClick = { newGame } variant="warning">Start New Game!</Button>
