@@ -16,7 +16,7 @@
   margin-top: -20px;
 }
 
-#nButton,#sButton,#hButton{
+#nButton,#sButton,#hButton,#stButton{
   display: none;
 }
 
@@ -36,6 +36,6 @@
 }
 
 img{
-  width: 100px;
-  height: 150px;
+  width: 8vw;
+  height: 20vh;
 }

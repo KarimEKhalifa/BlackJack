@@ -2,7 +2,7 @@ import React , {Component} from 'react';
 import {Row, Col, Container, Jumbotron, Button, FormControl, ButtonToolbar} from 'react-bootstrap'
 import './App.css';
 
-let cardColor, highCards, dScore, pScore, nButton, bButton, dRes, betArea, avBalance;
+let cardColor, highCards, dScore, pScore, nButton, bButton, stButton, dRes, betArea, avBalance;
 let pTable, dTable, hButton, sButton;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   bButton = document.getElementById("bButton");
   hButton = document.getElementById("hButton");
   sButton = document.getElementById("sButton");
+  stButton = document.getElementById("stButton");
   betArea = document.getElementById("betValue");
   avBalance = document.getElementById("avBalance");
   pTable = document.getElementById("playerTable");
@@ -53,24 +54,37 @@ const dealerPlay = () => {
   dTable.removeChild(dTable.firstChild);
   while (parseInt(dScore.firstChild.innerText) < 15)
      drawCard(dTable,dScore);
-  if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
+  if(avBalance.innerHTML == 0 && (parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player)){
+    appElem(dRes,"The House Wins! Play Again?");
+    dRes.style.color = "red";
+    stButton.style.display = "block";
+    nButton.style.display = "none";
+  }else if(parseInt(dScore.firstChild.innerText) <= 21 && parseInt(dScore.firstChild.innerText) > player ){
     appElem(dRes,"The dealer wins this round!");
     dRes.style.color = "red";
+    nButton.style.display = "block";
   }else if (parseInt(dScore.firstChild.innerText)=== player){
     appElem(dRes,"Draw!")
     dRes.style.color = "blue";
     updateBalance(3);
+    nButton.style.display = "block";
   }else{
     appElem(dRes,"Congrats, you win this round!");
     dRes.style.color = "green";
     updateBalance(1);
+    nButton.style.display = "block";
   }
-  nButton.style.display = "block";
 }
 
 const nextRound = () => {
   clearTable();
   nButton.style.display = "none";
+}
+
+const newGame = () => {
+  nextRound();
+  avBalance.innerHTML = 1000;
+  stButton.style.display = "none";
 }
 
 const startGame = () => {
@@ -87,6 +101,8 @@ const startGame = () => {
     bButton.style.display = "none";
     hButton.style.display = "block";
     sButton.style.display = "block";
+  }else if(avBalance.innerHTML === 0){
+    stButton.style.display = "block";
   }else{
     alert("Cannot bet more than you have!")
   }
@@ -115,6 +131,14 @@ const checkScore = () => {
     bButton.style.display = "none";
     hButton.style.display = "none";
     sButton.style.display = "none";
+  }else if(avBalance.innerHTML == 0 && score > 21){
+    appElem(dRes,"The House Wins! Play Again?");
+    dRes.style.color = "red";
+    nButton.style.display = "none";
+    bButton.style.display = "none";
+    hButton.style.display = "none";
+    sButton.style.display = "none";
+    stButton.style.display = "block";
   }else if(score > 21 ){
     updateBalance(0);
     appElem(dRes,"You've lost!");
@@ -227,6 +251,7 @@ class App extends Component {
                 <Button id="hButton" onClick={() => {drawCard(pTable,pScore); checkScore();}} style={{"marginRight": "10px"}} variant="success">Hit me!</Button>
                 <Button id="sButton" onClick={ dealerPlay } style={{"marginRight": "10px"}} variant="info">Stand</Button>
                 <Button id="nButton" onClick = { nextRound } variant="warning">Next Round!</Button>
+                <Button id="stButton" onClick = { newGame } variant="warning">Start New Game!</Button>
               </ButtonToolbar>
               </Col>
             </Row>
