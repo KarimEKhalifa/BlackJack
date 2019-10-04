@@ -1,4 +1,4 @@
-export class ElementManipulation{
+class ElementManipulation{
 
     constructor(el){
       this.elem = el;
@@ -20,7 +20,7 @@ export class ElementManipulation{
     }
   }
   
-  export  class Game{
+  export class Game{
 
     constructor(balance, bet, playerScore, hit, stand, next, start, betB, dealerTable, dealerScore, dealerCards, dispRes, playerCards){
         this.avBalance = balance;
@@ -50,7 +50,7 @@ export class ElementManipulation{
     }
 
   
-    dealerPlay = () => {
+    autoPlay = () => {
       let player = parseInt(this.pScore.firstChild.innerText)
       this.hButton.style.display = "none";
       this.sButton.style.display = "none";
@@ -152,22 +152,22 @@ export class ElementManipulation{
       
   }
   
-  export  class Cards{
+  export class Cards{
   
     constructor(table,score,res){
       this.value = 0;
       this.wTable = table;
       this.wScore = score;
-      this.wScoreManip = new ElementManipulation(this.wScore);
-      this.wTableManip = new ElementManipulation(this.wTable);
       this.dRes = res;
+      this.wTableManip = new ElementManipulation(this.wTable);
+      this.wScoreManip = new ElementManipulation(this.wScore);
       this.dResManip = new ElementManipulation(this.dRes);
       this.cardColor = ["C","D","H","S"];
       this.highCards = ["10","J","K","Q"];
     }
   
     checkCard = () => {
-      let cards = 0;
+      let cards;
       if (this.value === 10){
         cards = this.highCards[Math.floor(Math.random()*4)];
       }else if(this.value === 1){
@@ -193,7 +193,7 @@ export class ElementManipulation{
     }
   
     dispStartCards = () => {
-      let cards = 0;
+      let cards;
       let sum = 0;
       for( let i =0; i< 2; i++){
         let cardImages = document.createElement("img");
@@ -216,7 +216,7 @@ export class ElementManipulation{
       this.value = Math.ceil(Math.random()*10);
     }
   
-    clearCardsTable = (betArea) => {
+    clearCardsTable = () => {
       this.wTableManip.delElem();
       this.wScoreManip.repElem("0")
       this.dResManip.delElem();

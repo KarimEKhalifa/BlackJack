@@ -1,10 +1,11 @@
-import React , {Component} from 'react';
+import React , { Component } from 'react';
 import {Row, Col, Container, Jumbotron, Button, FormControl, ButtonToolbar} from 'react-bootstrap'
 import './App.css';
-import { Game, Cards} from './classes'
+import { Game, Cards } from './classes'
 
-let dScore, pScore, dRes, betArea, avBalance;
-let pTable, dTable, hButton, sButton, nButton, bButton, stButton;
+let dRes, betArea, avBalance;
+let pTable, dTable, dScore, pScore;
+let hButton, sButton, nButton, bButton, stButton;
 let pCards, dCards, blackJack;
 
 function checkInt(event){
@@ -35,10 +36,10 @@ class App extends Component {
   pCards = new Cards(pTable,pScore,dRes);
   dCards = new Cards(dTable,dScore,dRes);
   blackJack = new Game(avBalance, betArea, pScore, hButton, sButton, nButton, stButton, bButton, dTable, dScore, dCards, dRes, pCards);
-  
+
   bButton.onclick = () => { blackJack.startGame() };
   hButton.onclick = () => { pCards.drawCard(); blackJack.checkScore() };
-  sButton.onclick = () => { blackJack.dealerPlay() }
+  sButton.onclick = () => { blackJack.autoPlay() }
   nButton.onclick = () => { blackJack.nextRound() };
   stButton.onclick = () => { blackJack.newGame() };
 }
