@@ -7,19 +7,14 @@ let dScore, pScore, dRes, betArea, avBalance;
 let pTable, dTable, hButton, sButton, nButton, bButton, stButton;
 let pCards, dCards, blackJack;
 
-
-
-
 function checkInt(event){
   let value = parseInt(event.target.value)
   console.log(value)
   if( isNaN(value)){
     alert("Please enter a valid NUMBER!");
-    this.betArea.value = ""
+    betArea.value = ""
   }
 }
-
-
 
 class App extends Component {
 
@@ -39,10 +34,8 @@ class App extends Component {
 
   pCards = new Cards(pTable,pScore,dRes);
   dCards = new Cards(dTable,dScore,dRes);
-
-  console.log(bButton);
-
   blackJack = new Game(avBalance, betArea, pScore, hButton, sButton, nButton, stButton, bButton, dTable, dScore, dCards, dRes, pCards);
+  
   bButton.onclick = () => { blackJack.startGame() };
   hButton.onclick = () => { pCards.drawCard(); blackJack.checkScore() };
   sButton.onclick = () => { blackJack.dealerPlay() }

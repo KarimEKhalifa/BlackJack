@@ -1,5 +1,3 @@
-
-
 export class ElementManipulation{
 
     constructor(el){
@@ -80,11 +78,20 @@ export class ElementManipulation{
         this.nButton.style.display = "block";
       }
     }
+
+    clearBetArea = () => {
+        this.betArea.value="";
+        this.betArea.removeAttribute("disabled");
+    }
     
     nextRound = () => {
       this.pCards.clearCardsTable();
       this.dCards.clearCardsTable();
+      this.clearBetArea();
       this.nButton.style.display = "none";
+      this.bButton.style.display = "block";
+      this.hButton.style.display = "none";
+      this.sButton.style.display = "none";
     }
     
     newGame = () => {
@@ -117,7 +124,7 @@ export class ElementManipulation{
     checkScore = () => {
       let score = parseInt(this.pScore.firstChild.innerText);
       if(score === 21){
-        this.pdateBalance(2);
+        this.updateBalance(2);
         this.dResManip.appElem("BLACKJACK!!");
         this.dRes.style.color = "green";
         this.nButton.style.display = "block";
@@ -147,7 +154,7 @@ export class ElementManipulation{
   
   export  class Cards{
   
-    constructor(table,score, res){
+    constructor(table,score,res){
       this.value = 0;
       this.wTable = table;
       this.wScore = score;
@@ -190,7 +197,7 @@ export class ElementManipulation{
       let sum = 0;
       for( let i =0; i< 2; i++){
         let cardImages = document.createElement("img");
-        if(this.wTable !== this.dTable || i===1){
+        if(this.wTable.id !== "dealerTable" || i===1){
           this.genCard();
           sum+=this.value;
           cards = this.checkCard();
@@ -209,15 +216,10 @@ export class ElementManipulation{
       this.value = Math.ceil(Math.random()*10);
     }
   
-    clearCardsTable = () => {
+    clearCardsTable = (betArea) => {
       this.wTableManip.delElem();
       this.wScoreManip.repElem("0")
       this.dResManip.delElem();
-      this.betArea.value="";
-      this.betArea.removeAttribute("disabled");
-      this.bButton.style.display = "block";
-      this.hButton.style.display = "none";
-      this.sButton.style.display = "none";
     }
   
   }
